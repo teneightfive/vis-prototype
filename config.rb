@@ -46,12 +46,23 @@ set :images_dir, 'assets/images'
 set :relative_links, true
 
 ###
-# Compass
+# Bower configuration
 ###
 
+# Set bower components directory in `.bowerrc`
+bowerrc_dir = JSON.parse(IO.read("#{root}/.bowerrc"))['directory']
+# Sprockets
+ready do
+  sprockets.append_path(File.join(root, bowerrc_dir))
+end
+
+###
+# Compass
+###
 compass_config do |config|
   # Require any additional compass plugins here.
   config.add_import_path "../bower_components/foundation/scss"
+  config.add_import_path File.join(root, bowerrc_dir)
 
   # Set this to the root of your project when deployed:
   config.http_path = "/"
@@ -75,28 +86,12 @@ compass_config do |config|
   # preferred_syntax = :sass
   # and then run:
   # sass-convert -R --from scss --to sass sass scss && rm -rf sass && mv scss sass
-
 end
 
 # Change Compass configuration
 # compass_config do |config|
 #   config.output_style = :compact
 # end
-
-###
-# Bower configuration
-###
-
-# Set bower components directory in `.bowerrc`
-bowerrc_dir = JSON.parse(IO.read("#{root}/.bowerrc"))['directory']
-# Sprockets
-ready do
-  sprockets.append_path(File.join(root, bowerrc_dir))
-end
-# Compass
-compass_config do |config|
-  config.add_import_path File.join(root, bowerrc_dir)
-end
 
 ###
 # Development-secific configuration
@@ -124,6 +119,8 @@ configure :build do
   # Ignore .coffee files
   ignore /^.*\.coffee$/
 
+  ignore 'bower_components/**'
+
   # For example, change the Compass output style for deployment
   activate :minify_css
 
@@ -138,4 +135,14 @@ configure :build do
 
   # Or use a different image path
   # set :http_prefix, "/Content/images/"
+end
+
+
+activate :deploy do |deploy|
+  deploy.method = :git
+  # Optional Settings
+  # deploy.remote   = 'custom-remote' # remote name or git url, default: origin
+  # deploy.branch   = 'custom-branch' # default: gh-pages
+  # deploy.strategy = :submodule      # commit strategy: can be :force_push or :submodule, default: :force_push
+  # deploy.commit_message = 'custom-message'      # commit message (can be empty), default: Automated commit at `timestamp` by middleman-deploy `version`
 end
